@@ -132,7 +132,11 @@ class MyTable extends Component {
     }
 
     componentDidMount(){
-        
+        const {columns} = this.state;
+        columns.forEach(col => {
+            col['showHideCheck'] = true;
+        });
+        this.setState({columns})
     }
 
     print = () => {
@@ -217,7 +221,12 @@ class MyTable extends Component {
     }
 
     //ShowHideColumn Functions
-    showHideColumn = () => {
+    showHideColumn = (e) => {
+        let {columns} = this.state;
+        const colIndex = e.target.value[0];
+        columns[colIndex].showHideCheck = !columns[colIndex].showHideCheck;
+
+        this.setState({columns});
 
     }
 
@@ -251,9 +260,9 @@ class MyTable extends Component {
                                 MenuProps={MenuProps}
                                 onChange={this.showHideColumn}
                                 >
-                                {columns.map((column) => (
-                                    <MenuItem key={column.id} value={column.id}>
-                                        <Checkbox checked={true} />
+                                {columns.map((column,index) => (
+                                    <MenuItem key={column.id} value={index}>
+                                        <Checkbox checked={column.showHideCheck} />
                                         <ListItemText primary={column.Header} />
                                     </MenuItem>
                                 ))}
@@ -297,7 +306,7 @@ class MyTable extends Component {
                             <thead>
                                 <tr>
                                     {columns.map((column,i) => (
-                                        <th style={{borderBottom:'2px solid #c8ced3',cursor: 'pointer'}} key={i}>
+                                        <th style={{borderBottom:'2px solid #c8ced3',cursor: 'pointer',display:column.showHideCheck ? "":"none"}} key={i}>
                                             <div onClick={this.getSortByToggleProps} column-index={i}>
                                                 <span column-index={i}>
                                                     {column.Header+ " " }
@@ -319,7 +328,7 @@ class MyTable extends Component {
                                             <tr key={i}>
                                                 {row.map((cell,i) => {
                                                     return (
-                                                        <td key={i} style={{borderTop:'1px solid #c8ced3'}}>
+                                                        <td key={i} style={{borderTop:'1px solid #c8ced3',display:columns[i].showHideCheck ? "":"none" }}>
                                                             {cell}
                                                         </td>
                                                     );
