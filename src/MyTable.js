@@ -151,7 +151,7 @@ class MyTable extends Component {
         }, 1000);
     };
 
-    //Sorting Function
+    //Sorting Functions
     getSortByToggleProps = (event) => {
 
         const colIndex = event.target.getAttribute('column-index');
