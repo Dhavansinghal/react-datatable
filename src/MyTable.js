@@ -140,6 +140,8 @@ class MyTable extends Component {
         const {columns} = this.state;
         columns.forEach(col => {
             col['showHideCheck'] = true;
+            col['SortedDircDesc'] = false;
+            col['sortIconShow'] = false;
         });
         this.setState({columns})
     }
@@ -166,7 +168,10 @@ class MyTable extends Component {
         const colIndex = event.target.getAttribute('column-index');
         const {filterData,columns,initalTableData} = this.state;
 
-        columns[colIndex]['sortIconShow'] = true;
+        columns.forEach((col,key) => {
+            col.sortIconShow = (key === Number(colIndex)); 
+            
+        });
 
         if(columns[colIndex].SortedDircDesc){
             filterData.sort(function( a, b )  {
@@ -187,10 +192,11 @@ class MyTable extends Component {
 
             initalTableData.sort(function( a, b )  {
                 if ( a[colIndex] === b[colIndex] ) return 0;
-                return a[colIndex] > b[colIndex] ? -1 : 1;
+                return a[colIndex] < b[colIndex] ? -1 : 1;
             });
         }
 
+      
         columns[colIndex].SortedDircDesc = !columns[colIndex].SortedDircDesc;
 
         this.setState({filterData,columns});
@@ -253,23 +259,26 @@ class MyTable extends Component {
             case "Dropdown": 
                 return this.getDropdownFilter(colIndex);
             default:
-                return "Nothing happen"
+                return "Unknown Filter"
         }
     }
 
     getSearchFilter = (colIndex)=>{
-        let {filterData} = this.state;
+        let {initalTableData} = this.state;
 
         return (
             <TextField 
+                defaultValue={""}
                 onChange={e => {
                     if (e.target.value){
                         let searchvalue = e.target.value.toString().toLowerCase();
-                        const results = filterData.filter( row => row[colIndex].toString().toLowerCase().includes(searchvalue) )
-                        this.setState({filterData:results})
+                        const results = initalTableData.filter( row => row[colIndex].toString().toLowerCase().includes(searchvalue) )
+                        this.setState({filterData:results,pageCount:Math.ceil(results.length/this.state.pageRow),},()=>{
+                            this.gotoPage(0);
+                        })
                     }
                     else {
-                        this.setState({filterData:this.state.initalTableData});
+                        this.setState({filterData:initalTableData,pageCount:Math.ceil(initalTableData.length/this.state.pageRow)});
                     }
                 }}
                 label={`Search By ${this.state.columns[colIndex].Header} `} 
@@ -278,7 +287,34 @@ class MyTable extends Component {
     }
 
     getDropdownFilter = (colIndex)=>{
-        return "Sochne Do Thoda "
+        var {filterData} = this.state;
+        const {classes} = this.props;
+        var distinctValues = [];
+        filterData.forEach(row => {
+            if (!distinctValues.includes(row[colIndex])){
+                distinctValues.push(row[colIndex]);
+            }
+        });
+
+        return (
+            <FormControl className={classes.formControl}>
+                <InputLabel >
+                    Filter By {this.state.columns[colIndex].Header}
+                </InputLabel>
+                <Select
+                    defaultValue={""} 
+                    onChange={(e)=>{
+                        console.log("HelloBrother",e.target.value)
+                    }}
+                    >
+                    {distinctValues.map((colValue,index) => (
+                        <MenuItem key={colValue} value={colValue}>
+                            {colValue}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+        )
     }   
 
     render() {
@@ -353,7 +389,7 @@ class MyTable extends Component {
                 {/* Table Start From Here */}
                 <div>
                     <div id="printarea" >
-                        <table className="table table-hover">
+                        <table className="table table-hover" style={{tableLayout:"fixed"}}>
                             <thead>
                                 <tr>
                                     {columns.map((column,i) => (
@@ -364,8 +400,8 @@ class MyTable extends Component {
                                                     {/* Add a sort direction indicator */}
                                                     {column.sortIconShow
                                                         ? column.SortedDircDesc
-                                                            ? <ArrowDownwardIcon column-index={i} />
-                                                            : <ArrowUpwardIcon column-index={i} />
+                                                            ? <ArrowDownwardIcon style={{width:'1em'}} column-index={i} />
+                                                            : <ArrowUpwardIcon style={{width:'1em'}} column-index={i} />
                                                         : ""}
                                                 </span>
                                             </div>
@@ -460,7 +496,7 @@ class MyTable extends Component {
                         />
                     </span>{" "}
                     <FormControl className={classes.formControl}>
-                        <InputLabel id="demo-simple-select-label">
+                        <InputLabel>
                             Result Per Page
                         </InputLabel>
                         <Select
