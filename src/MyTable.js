@@ -87,28 +87,33 @@ const initialColumnProps = [
     {
         Header: "Name",
         id: "name_id",
-        Filter: "search",
+        Filter: "Search",
     },
     {
         Header: "Bori",
         id: "packages",
         Filter: false,
     },
+    {
+        Header: "Status",
+        id: "status",
+        Filter: "Dropdown",
+    },
 ];
 const initialDataProps = [
-    ["I", 4560],
-    ["B", 451],
-    ["C", 451],
-    ["D", 451],
-    ["E", 451],
-    ["F", 451],
-    ["G", 451],
-    ["H", 451],
-    ["Z", 451],
-    ["X", 451],
-    ["Y", 451],
-    ["W", 451],
-    ["Q", 451],
+    ["I", 4560,"Pending"],
+    ["B", 451,"Pending"],
+    ["C", 451,"Done"],
+    ["Dhavan", 451,"Done"],
+    ["E", 451,"Pending"],
+    ["F", 451,"Done"],
+    ["G", 451,"Done"],
+    ["H", 451,"Pending"],
+    ["Z", 451,"Done"],
+    ["X", 451,"Pending"],
+    ["Y", 451,"Pending"],
+    ["W", 451,"Done"],
+    ["Q", 451,"Done"],
 ];
 
 
@@ -159,12 +164,17 @@ class MyTable extends Component {
     getSortByToggleProps = (event) => {
 
         const colIndex = event.target.getAttribute('column-index');
-        const {filterData,columns} = this.state;
+        const {filterData,columns,initalTableData} = this.state;
 
         columns[colIndex]['sortIconShow'] = true;
 
         if(columns[colIndex].SortedDircDesc){
             filterData.sort(function( a, b )  {
+                if ( a[colIndex] === b[colIndex] ) return 0;
+                return a[colIndex] > b[colIndex] ? -1 : 1;
+            });
+
+            initalTableData.sort(function( a, b )  {
                 if ( a[colIndex] === b[colIndex] ) return 0;
                 return a[colIndex] > b[colIndex] ? -1 : 1;
             });
@@ -174,13 +184,18 @@ class MyTable extends Component {
                 if ( a[colIndex] === b[colIndex] ) return 0;
                 return a[colIndex] < b[colIndex] ? -1 : 1;
             });
+
+            initalTableData.sort(function( a, b )  {
+                if ( a[colIndex] === b[colIndex] ) return 0;
+                return a[colIndex] > b[colIndex] ? -1 : 1;
+            });
         }
 
         columns[colIndex].SortedDircDesc = !columns[colIndex].SortedDircDesc;
 
         this.setState({filterData,columns});
+        this.setState({initalTableData})
     };
-
 
     //Pagination Functions
     checkCanNextPreviousPage = () => {
@@ -230,6 +245,42 @@ class MyTable extends Component {
 
     }
 
+    //Set Different Fillters
+    checkFilterName = (name,colIndex) => {
+        switch(name){
+            case "Search": 
+                return this.getSearchFilter(colIndex);
+            case "Dropdown": 
+                return this.getDropdownFilter(colIndex);
+            default:
+                return "Nothing happen"
+        }
+    }
+
+    getSearchFilter = (colIndex)=>{
+        let {filterData} = this.state;
+
+        return (
+            <TextField 
+                onChange={e => {
+                    if (e.target.value){
+                        let searchvalue = e.target.value.toString().toLowerCase();
+                        const results = filterData.filter( row => row[colIndex].toString().toLowerCase().includes(searchvalue) )
+                        this.setState({filterData:results})
+                    }
+                    else {
+                        this.setState({filterData:this.state.initalTableData});
+                    }
+                }}
+                label={`Search By ${this.state.columns[colIndex].Header} `} 
+            />
+        )
+    }
+
+    getDropdownFilter = (colIndex)=>{
+        return "Sochne Do Thoda "
+    }   
+
     render() {
         const {classes} = this.props;
         const {columns, filterData,pageNumber,pageRow,pageCount} = this.state;
@@ -273,7 +324,7 @@ class MyTable extends Component {
                     {columns.map((column, key) =>
                         column.Filter ? (
                             <div key={key}>
-                                <span>{column.Filter}</span>
+                                <span>{this.checkFilterName(column.Filter, key) }</span>
                             </div>
                         ) : null
                     )}
