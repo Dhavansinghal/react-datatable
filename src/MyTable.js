@@ -147,7 +147,7 @@ class MyTable extends Component {
             canNextPage:true,
 
             //FilterArray
-            filterValues:[null] * initialColumnProps.length
+            filterValues: new Array(initialColumnProps.length).fill(null),
         };
     }
 
@@ -280,8 +280,9 @@ class MyTable extends Component {
         }
     }
     getSearchFilter = (colIndex)=>{
-        let {initalTableData,filterData,filterValues} = this.state;
+        let {filterValues} = this.state;
         const { classes} =this.props;
+
         return (
             <div className={classes.formControl}>
                 <TextField 
@@ -290,25 +291,6 @@ class MyTable extends Component {
                         filterValues[colIndex] = e.target.value
                         this.setState({filterValues});
                         this.applyFilterSets();
-                        if (e.target.value ){
-                            if(filterData.length){
-                                let searchvalue = e.target.value.toString().toLowerCase();
-                                const results = filterData.filter( row => row[colIndex].toString().toLowerCase().includes(searchvalue) )
-                                this.setState({filterData:results,pageCount:Math.ceil(results.length/this.state.pageRow),},()=>{
-                                    this.gotoPage(0);
-                                })
-                            }
-                            else {
-                                let searchvalue = e.target.value.toString().toLowerCase();
-                                const results = initalTableData.filter( row => row[colIndex].toString().toLowerCase().includes(searchvalue) )
-                                this.setState({filterData:results,pageCount:Math.ceil(results.length/this.state.pageRow),},()=>{
-                                    this.gotoPage(0);
-                                })
-                            }
-                        }
-                        else {
-                            this.setState({filterData:initalTableData,pageCount:Math.ceil(initalTableData.length/this.state.pageRow)});
-                        }
                     }}
                     label={`Search By ${this.state.columns[colIndex].Header} `} 
                 />
@@ -336,16 +318,6 @@ class MyTable extends Component {
                         filterValues[colIndex] = e.target.value
                         this.setState({filterValues});
                         this.applyFilterSets();
-                        if (e.target.value){
-                            let selectValue = e.target.value.toString().toLowerCase();
-                            const results = initalTableData.filter( row => row[colIndex].toString().toLowerCase() === selectValue )
-                            this.setState({filterData:results,pageCount:Math.ceil(results.length/this.state.pageRow),},()=>{
-                                this.gotoPage(0);
-                            })
-                        }
-                        else {
-                            this.setState({filterData:initalTableData,pageCount:Math.ceil(initalTableData.length/this.state.pageRow)});
-                        }
                     }}
                     >
                     <MenuItem value={""} style={{color:'#0000008a'}}>No Filter</MenuItem>
@@ -359,11 +331,11 @@ class MyTable extends Component {
         )
     }   
     getDateRangeFilter = (colIndex)=>{
-        var {initalTableData,filterData,filterValues} = this.state;
+        var {initalTableData,filterValues} = this.state;
         const {classes} = this.props;
         
-        if(!filterValues[colIndex][0]){
-            filterValues[colIndex][0] = null
+        if(!filterValues[colIndex]){
+            filterValues[colIndex] = [null,null]
         }
 
         let min = initalTableData.length ? initalTableData[0][colIndex] : new Date()
@@ -396,18 +368,6 @@ class MyTable extends Component {
                         filterValues[colIndex][0] = e.target.value
                         this.setState({filterValues});
                         this.applyFilterSets();
-                        if (filterData.length){
-                            const results = filterData.filter(function(row) {
-                                return new Date(row[colIndex]).getTime() >= new Date(e.target.value).getTime()
-                            })
-                            this.setState({filterData:results})
-                        }
-                        else {
-                            const results = initalTableData.filter(function(row) {
-                                return new Date(row[colIndex]).getTime() >= new Date(e.target.value).getTime()
-                            })
-                            this.setState({filterData:results})
-                        }
                     }}
                     InputLabelProps={{
                         shrink: true,
@@ -421,22 +381,9 @@ class MyTable extends Component {
                     defaultValue={max || ''}
                     className={classes.textField}
                     onChange={e => {
-                        
-                            filterValues[colIndex][1] = e.target.value
-                            this.setState({filterValues});
-                            this.applyFilterSets();
-                        if (filterData.length){
-                            const results = filterData.filter(function(row) {
-                                return new Date(row[colIndex]).getTime() <= new Date(e.target.value).getTime()
-                            })
-                            this.setState({filterData:results})
-                        }
-                        else {
-                            const results = initalTableData.filter(function(row) {
-                                return new Date(row[colIndex]).getTime() <= new Date(e.target.value).getTime()
-                            })
-                            this.setState({filterData:results})
-                        }
+                        filterValues[colIndex][1] = e.target.value
+                        this.setState({filterValues});
+                        this.applyFilterSets();
                     }}
                     InputLabelProps={{
                         shrink: true,
@@ -448,17 +395,51 @@ class MyTable extends Component {
     }   
 
     applyFilterSets = () =>{
-        console.log("Trying Another Way of Filttering ");
+        const {columns,filterValues,initalTableData} =this.state;
+        var resultData = initalTableData;
+        filterValues.forEach((filterValue,key) => {
+            if(filterValue){
+                switch(columns[key].Filter.toString().toLowerCase()){
+                    case "search": 
+                        let searchvalue = filterValue.toString().toLowerCase();
+                        resultData = resultData.filter( row => row[key].toString().toLowerCase().includes(searchvalue) )
+                        break;
+                    case "dropdown": 
+                        let selectValue = filterValue.toString().toLowerCase();
+                        resultData = resultData.filter( row => row[key].toString().toLowerCase() === selectValue )
+                        break;
+                    case "daterange": 
+                        //For Min Value
+                        if(filterValue[0]){
+                            resultData = resultData.filter(function(row) {
+                                return new Date(row[key]).getTime() >= new Date(filterValue[0]).getTime()
+                            })
+                        }
+                        //For Max Value
+                        if(filterValue[1]){
+                            resultData = resultData.filter(function(row) {
+                                return new Date(row[key]).getTime() <= new Date(filterValue[1]).getTime()
+                            })
+                        }
+                        break;
+                    default:
+                        console.log("Unknown Filter");
+                }
+            }
+        })
+
+        this.setState({filterData:resultData,pageCount:Math.ceil(resultData.length/this.state.pageRow),},()=>{
+            this.gotoPage(0);
+        })
     }
 
     render() {
         const {classes} = this.props;
         const {columns, filterData,pageNumber,pageRow,pageCount} = this.state;
         
-        const {canNextPage, canPreviousPage,filterValues} = this.state;
+        const {canNextPage, canPreviousPage} = this.state;
         
-        console.log(filterValues);
-
+        
         return (
             <div style={{width:'80rem',margin:'auto'}}>
                 {/* Data Filter Options */}
