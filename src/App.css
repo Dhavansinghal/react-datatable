@@ -1,7 +1,12 @@
 .App {
   text-align: center;
- 
+  height:100ev;
 }
 body {
   background-color: #e4e5e6;
+}
+
+.fontFamily {
+  font-family: "Pacifico", cursive;
+  text-shadow: 2px 2px 4px #000000;
 }

@@ -445,8 +445,7 @@ class MyTable extends Component {
                     style={{
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
-                        float: "right",
+                        justifyContent: "flex-end",
                         padding: "0.5rem",
                     }}>
                     {/* Show Hide Dropdown */}
@@ -564,8 +563,7 @@ class MyTable extends Component {
                     style={{
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
-                        float: "right",
+                        justifyContent: "flex-end",
                     }}
                 >
                     <IconButton
