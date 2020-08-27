@@ -29,8 +29,8 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 const styles = (theme) => ({
     formControl: {
         margin: theme.spacing(1),
-        minWidth: 120,
-        maxWidth: 300,
+        minWidth: 135,
+        maxWidth: 150,
         float: "left",
     },
     chips: {
@@ -99,21 +99,33 @@ const initialColumnProps = [
         id: "status",
         Filter: "Dropdown",
     },
+    {
+        Header: "Date",
+        id: "date",
+        Filter: "daterange",
+    },
 ];
+
+const randomDate =()=> {
+    let date = new Date(+(new Date()) - Math.floor(Math.random()*10000000000))
+
+    return date.getFullYear()+"-"+date.getMonth()+"-"+date.getDay()
+}
+
 const initialDataProps = [
-    ["I", 4560,"Pending"],
-    ["B", 451,"Pending"],
-    ["C", 451,"Done"],
-    ["Dhavan", 451,"Done"],
-    ["E", 451,"Pending"],
-    ["F", 451,"Done"],
-    ["G", 451,"Done"],
-    ["H", 451,"Pending"],
-    ["Z", 451,"Done"],
-    ["X", 451,"Pending"],
-    ["Y", 451,"Pending"],
-    ["W", 451,"Done"],
-    ["Q", 451,"Done"],
+    ["I", 4560,"Pending",randomDate()],
+    ["A", 451,"Pending",randomDate()],
+    ["C", 451,"Done",randomDate()],
+    ["Dhavan", 451,"Done",randomDate()],
+    ["E", 451,"Pending",randomDate()],
+    ["F", 451,"Done",randomDate()],
+    ["G", 451,"Done",randomDate()],
+    ["H", 451,"Pending",randomDate()],
+    ["Z", 451,"Done",randomDate()],
+    ["X", 451,"Pending",randomDate()],
+    ["Y", 451,"Pending",randomDate()],
+    ["W", 451,"Done",randomDate()],
+    ["Q", 451,"Done",randomDate()],
 ];
 
 
@@ -132,7 +144,10 @@ class MyTable extends Component {
             pageNumber: 0,
             pageCount:Math.ceil(initialDataProps.length/5),
             canPreviousPage:false,
-            canNextPage:true
+            canNextPage:true,
+
+            //FilterArray
+            filterValues:[null] * initialColumnProps.length
         };
     }
 
@@ -253,44 +268,58 @@ class MyTable extends Component {
 
     //Set Different Fillters
     checkFilterName = (name,colIndex) => {
-        switch(name){
-            case "Search": 
+        switch(name.toString().toLowerCase()){
+            case "search": 
                 return this.getSearchFilter(colIndex);
-            case "Dropdown": 
+            case "dropdown": 
                 return this.getDropdownFilter(colIndex);
+            case "daterange": 
+                return this.getDateRangeFilter(colIndex);
             default:
                 return "Unknown Filter"
         }
     }
-
     getSearchFilter = (colIndex)=>{
-        let {initalTableData} = this.state;
-
+        let {initalTableData,filterData,filterValues} = this.state;
+        const { classes} =this.props;
         return (
-            <TextField 
-                defaultValue={""}
-                onChange={e => {
-                    if (e.target.value){
-                        let searchvalue = e.target.value.toString().toLowerCase();
-                        const results = initalTableData.filter( row => row[colIndex].toString().toLowerCase().includes(searchvalue) )
-                        this.setState({filterData:results,pageCount:Math.ceil(results.length/this.state.pageRow),},()=>{
-                            this.gotoPage(0);
-                        })
-                    }
-                    else {
-                        this.setState({filterData:initalTableData,pageCount:Math.ceil(initalTableData.length/this.state.pageRow)});
-                    }
-                }}
-                label={`Search By ${this.state.columns[colIndex].Header} `} 
-            />
+            <div className={classes.formControl}>
+                <TextField 
+                    defaultValue={""}
+                    onChange={e => {
+                        filterValues[colIndex] = e.target.value
+                        this.setState({filterValues});
+                        this.applyFilterSets();
+                        if (e.target.value ){
+                            if(filterData.length){
+                                let searchvalue = e.target.value.toString().toLowerCase();
+                                const results = filterData.filter( row => row[colIndex].toString().toLowerCase().includes(searchvalue) )
+                                this.setState({filterData:results,pageCount:Math.ceil(results.length/this.state.pageRow),},()=>{
+                                    this.gotoPage(0);
+                                })
+                            }
+                            else {
+                                let searchvalue = e.target.value.toString().toLowerCase();
+                                const results = initalTableData.filter( row => row[colIndex].toString().toLowerCase().includes(searchvalue) )
+                                this.setState({filterData:results,pageCount:Math.ceil(results.length/this.state.pageRow),},()=>{
+                                    this.gotoPage(0);
+                                })
+                            }
+                        }
+                        else {
+                            this.setState({filterData:initalTableData,pageCount:Math.ceil(initalTableData.length/this.state.pageRow)});
+                        }
+                    }}
+                    label={`Search By ${this.state.columns[colIndex].Header} `} 
+                />
+            </div>
         )
     }
-
     getDropdownFilter = (colIndex)=>{
-        var {filterData} = this.state;
+        var {initalTableData,filterValues} = this.state;
         const {classes} = this.props;
         var distinctValues = [];
-        filterData.forEach(row => {
+        initalTableData.forEach(row => {
             if (!distinctValues.includes(row[colIndex])){
                 distinctValues.push(row[colIndex]);
             }
@@ -304,10 +333,23 @@ class MyTable extends Component {
                 <Select
                     defaultValue={""} 
                     onChange={(e)=>{
-                        console.log("HelloBrother",e.target.value)
+                        filterValues[colIndex] = e.target.value
+                        this.setState({filterValues});
+                        this.applyFilterSets();
+                        if (e.target.value){
+                            let selectValue = e.target.value.toString().toLowerCase();
+                            const results = initalTableData.filter( row => row[colIndex].toString().toLowerCase() === selectValue )
+                            this.setState({filterData:results,pageCount:Math.ceil(results.length/this.state.pageRow),},()=>{
+                                this.gotoPage(0);
+                            })
+                        }
+                        else {
+                            this.setState({filterData:initalTableData,pageCount:Math.ceil(initalTableData.length/this.state.pageRow)});
+                        }
                     }}
                     >
-                    {distinctValues.map((colValue,index) => (
+                    <MenuItem value={""} style={{color:'#0000008a'}}>No Filter</MenuItem>
+                    {distinctValues.map((colValue,index) => ( 
                         <MenuItem key={colValue} value={colValue}>
                             {colValue}
                         </MenuItem>
@@ -316,13 +358,107 @@ class MyTable extends Component {
             </FormControl>
         )
     }   
+    getDateRangeFilter = (colIndex)=>{
+        var {initalTableData,filterData,filterValues} = this.state;
+        const {classes} = this.props;
+        
+        if(!filterValues[colIndex][0]){
+            filterValues[colIndex][0] = null
+        }
+
+        let min = initalTableData.length ? initalTableData[0][colIndex] : new Date()
+        let max = initalTableData.length ? initalTableData[0][colIndex] : new Date()
+
+        initalTableData.forEach(row => {
+            if (new Date(row[colIndex]).getTime() < new Date(min).getTime()) {
+                min = row[colIndex]
+            }
+            else if (new Date(row[colIndex]).getTime() > new Date(max).getTime()) {
+                max = row[colIndex]
+            }
+        })
+
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    float: "left"
+                }}
+            >
+                <TextField
+                    id="minValue"
+                    label={"Min Value " + min}
+                    type="date"
+                    color="primary"
+                    defaultValue={min || ''}
+                    className={classes.textField}
+                    onChange={e => {
+                        filterValues[colIndex][0] = e.target.value
+                        this.setState({filterValues});
+                        this.applyFilterSets();
+                        if (filterData.length){
+                            const results = filterData.filter(function(row) {
+                                return new Date(row[colIndex]).getTime() >= new Date(e.target.value).getTime()
+                            })
+                            this.setState({filterData:results})
+                        }
+                        else {
+                            const results = initalTableData.filter(function(row) {
+                                return new Date(row[colIndex]).getTime() >= new Date(e.target.value).getTime()
+                            })
+                            this.setState({filterData:results})
+                        }
+                    }}
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                />
+                <TextField
+                    id="maxvalue"
+                    label={"Max Value " + max}
+                    type="date"
+                    color="primary"
+                    defaultValue={max || ''}
+                    className={classes.textField}
+                    onChange={e => {
+                        
+                            filterValues[colIndex][1] = e.target.value
+                            this.setState({filterValues});
+                            this.applyFilterSets();
+                        if (filterData.length){
+                            const results = filterData.filter(function(row) {
+                                return new Date(row[colIndex]).getTime() <= new Date(e.target.value).getTime()
+                            })
+                            this.setState({filterData:results})
+                        }
+                        else {
+                            const results = initalTableData.filter(function(row) {
+                                return new Date(row[colIndex]).getTime() <= new Date(e.target.value).getTime()
+                            })
+                            this.setState({filterData:results})
+                        }
+                    }}
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                />
+            </div>
+    
+        )
+    }   
+
+    applyFilterSets = () =>{
+        console.log("Trying Another Way of Filttering ");
+    }
 
     render() {
         const {classes} = this.props;
         const {columns, filterData,pageNumber,pageRow,pageCount} = this.state;
         
-        const {canNextPage, canPreviousPage} = this.state;
+        const {canNextPage, canPreviousPage,filterValues} = this.state;
         
+        console.log(filterValues);
+
         return (
             <div style={{width:'80rem',margin:'auto'}}>
                 {/* Data Filter Options */}
