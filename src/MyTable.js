@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 // import { Table, Row } from "reactstrap";
 
-// import {motion, AnimatePresence} from "framer-motion";
+import {motion, AnimatePresence} from "framer-motion";
 
 import withStyles from "@material-ui/core/styles/withStyles";
 
@@ -188,7 +188,7 @@ class MyTable extends Component {
             
         });
 
-        if(columns[colIndex].SortedDircDesc){
+        if(columns[colIndex] && columns[colIndex].SortedDircDesc){
             filterData.sort(function( a, b )  {
                 if ( a[colIndex] === b[colIndex] ) return 0;
                 return a[colIndex] > b[colIndex] ? -1 : 1;
@@ -211,9 +211,10 @@ class MyTable extends Component {
             });
         }
 
-      
-        columns[colIndex].SortedDircDesc = !columns[colIndex].SortedDircDesc;
-
+        if(columns[colIndex]){
+            columns[colIndex].SortedDircDesc = !columns[colIndex].SortedDircDesc;
+        }
+        
         this.setState({filterData,columns});
         this.setState({initalTableData})
     };
@@ -313,14 +314,14 @@ class MyTable extends Component {
                     Filter By {this.state.columns[colIndex].Header}
                 </InputLabel>
                 <Select
-                    defaultValue={""} 
+                    defaultValue={" "} 
                     onChange={(e)=>{
                         filterValues[colIndex] = e.target.value
                         this.setState({filterValues});
                         this.applyFilterSets();
                     }}
                     >
-                    <MenuItem value={""} style={{color:'#0000008a'}}>No Filter</MenuItem>
+                    <MenuItem value={" "} style={{color:'#0000008a'}}>No Filter</MenuItem>
                     {distinctValues.map((colValue,index) => ( 
                         <MenuItem key={colValue} value={colValue}>
                             {colValue}
@@ -405,8 +406,10 @@ class MyTable extends Component {
                         resultData = resultData.filter( row => row[key].toString().toLowerCase().includes(searchvalue) )
                         break;
                     case "dropdown": 
-                        let selectValue = filterValue.toString().toLowerCase();
-                        resultData = resultData.filter( row => row[key].toString().toLowerCase() === selectValue )
+                        if(filterValue !== " "){
+                            let selectValue = filterValue.toString().toLowerCase();
+                            resultData = resultData.filter( row => row[key].toString().toLowerCase() === selectValue )
+                        }
                         break;
                     case "daterange": 
                         //For Min Value
@@ -517,35 +520,47 @@ class MyTable extends Component {
                                                     {/* Add a sort direction indicator */}
                                                     {column.sortIconShow
                                                         ? column.SortedDircDesc
-                                                            ? <ArrowDownwardIcon style={{width:'1em'}} column-index={i} />
-                                                            : <ArrowUpwardIcon style={{width:'1em'}} column-index={i} />
+                                                            ?<ArrowDownwardIcon  style={{width:'1em'}} column-index={i} />
+                                                            :<ArrowUpwardIcon style={{width:'1em'}} column-index={i} />
                                                         : ""}
-                                                </span>
+                                                 </span>
                                             </div>
                                         </th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
+                                <AnimatePresence>
                                     {filterData.slice(pageNumber*pageRow,pageNumber*pageRow +pageRow).map((row,i) => {
                                         return (
-                                            <tr key={i}>
+                                            <motion.tr key={i} 
+                                                initial={{opacity: 0.4,y:-10}} 
+                                                animate={{opacity: 1,y:0}} 
+                                                exit={{ opacity: 0, y:-10 }}
+                                            >
                                                 {row.map((cell,i) => {
                                                     return (
-                                                        <td key={i} style={{borderTop:'1px solid #c8ced3',display:columns[i].showHideCheck ? "":"none" }}>
+                                                        <motion.td 
+                                                            key={i} 
+                                                            style={{borderTop:'1px solid #c8ced3',display:columns[i].showHideCheck ? "":"none" }}
+                                                            initial={{opacity: 0,y:-10}} 
+                                                            animate={{opacity: 1,y:0}} 
+                                                            exit={{ opacity: 0.4, y:-10 }}
+                                                        >
                                                             {cell}
-                                                        </td>
+                                                        </motion.td>
                                                     );
                                                 })}
-                                            </tr>
+                                            </motion.tr>
                                         );
                                     })}
+                                </AnimatePresence>
                             </tbody>
                             <tfoot>
                                 {/* Show Footer If True */}
                             </tfoot>
                         </table>
-                   
+                        
                     </div>
                 </div>
                 {/* Pagination Start From Here */}
