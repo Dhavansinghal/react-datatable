@@ -1,21 +1,23 @@
 import React, {Component} from "react";
+// import { Table, Row } from "reactstrap";
 
 import {motion, AnimatePresence} from "framer-motion";
 
 import withStyles from "@material-ui/core/styles/withStyles";
 
 
-import { 
-    Input,InputLabel,MenuItem ,FormControl,
-    ListItemText,Select,Checkbox,TextField,
-    Button,IconButton
-} from "@material-ui/core";
+import { Input,InputLabel,MenuItem ,FormControl,
+        ListItemText,Select,Checkbox,TextField,
+        Button,IconButton
+    } from "@material-ui/core";
 
-import {
-    ArrowForwardIosIcon,ArrowBackIosIcon,
-    FastForwardIcon,FastRewindIcon,PrintIcon,
-    ArrowUpwardIcon,ArrowDownwardIcon
-} from "@material-ui/icons";
+import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
+import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
+import FastForwardIcon from "@material-ui/icons/FastForward";
+import FastRewindIcon from "@material-ui/icons/FastRewind";
+import PrintIcon from "@material-ui/icons/Print";
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 
 
 //Style For Select Tag
