@@ -439,15 +439,19 @@ class MyTable extends Component {
         
         
         return (
-            <div style={{width:'80rem',margin:'auto'}}>
+            <div className="container-fluid">
                 {/* Data Filter Options */}
                 <div
+                    
+                    className="row"
                     style={{
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "flex-end",
                         padding: "0.5rem",
-                    }}>
+                    }}
+                    >
+                    
                     {/* Show Hide Dropdown */}
                     <div>
                         <FormControl className={classes.formControl}>
@@ -502,7 +506,7 @@ class MyTable extends Component {
 
                 {/* Table Start From Here */}
                 <div>
-                    <div id="printarea" >
+                    <div id="printarea" className="table-responsive" >
                         <table className="table table-hover" style={{tableLayout:"fixed"}}>
                             <thead>
                                 <tr>
@@ -559,7 +563,7 @@ class MyTable extends Component {
                 </div>
                 {/* Pagination Start From Here */}
                 <div
-                    className="pagination"
+                    className="pagination row"
                     style={{
                         display: "flex",
                         alignItems: "center",
