@@ -605,9 +605,9 @@ class MyTable extends Component {
                     </IconButton>
                     <span style={{paddingRight: "15px"}}>
                         {" "}
-                        <strong>
-                            {pageNumber + 1} of {pageCount}
-                        </strong>{" "}
+                            Page:<strong> {pageNumber + 1} of {pageCount}</strong><br/>
+                            Record: <strong>{filterData.length > pageRow ? pageRow : filterData.length} of {filterData.length}</strong>
+                        {" "}
                     </span>
                     <span>
                         {"   "}
