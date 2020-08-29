@@ -439,10 +439,10 @@ class MyTable extends Component {
         
         
         return (
-            <div className="container-fluid">
+            <div className="container-fluid" id="OuterMostDataDilterTableDiv">
                 {/* Data Filter Options */}
                 <div
-                    
+                    id="FilterOptionOuterMostDataFilterTableDiv"
                     className="row"
                     style={{
                         display: "flex",
@@ -453,7 +453,7 @@ class MyTable extends Component {
                     >
                     
                     {/* Show Hide Dropdown */}
-                    <div>
+                    <div className="FilterOptionDataFilterTableDiv">
                         <FormControl className={classes.formControl}>
                             <InputLabel shrink>
                                 Show/Hide Column
@@ -477,14 +477,14 @@ class MyTable extends Component {
 
                     {columns.map((column, key) =>
                         column.Filter ? (
-                            <div key={key}>
+                            <div key={key} className="FilterOptionDataFilterTableDiv">
                                 <span>{this.checkFilterName(column.Filter, key) }</span>
                             </div>
                         ) : null
                     )}
 
                     {/* Print Function */}
-                    <div>
+                    <div className="FilterOptionDataFilterTableDiv">
                         <iframe
                             id="ifmcontentstoprint"
                             title="ptint"
@@ -505,10 +505,10 @@ class MyTable extends Component {
                 </div>
 
                 {/* Table Start From Here */}
-                <div>
+                <div id="DataFilterTableDiv">
                     <div id="printarea" className="table-responsive" >
-                        <table className="table table-hover" style={{tableLayout:"fixed"}}>
-                            <thead>
+                        <table id="DataFilterTableTable" className="table table-hover" style={{tableLayout:"fixed"}}>
+                            <thead id="DataFilterTableThead">
                                 <tr>
                                     {columns.map((column,i) => (
                                         <th style={{borderBottom:'2px solid #c8ced3',cursor: 'pointer',display:column.showHideCheck ? "":"none"}} key={i}>
@@ -527,7 +527,7 @@ class MyTable extends Component {
                                     ))}
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="DataFilterTableTbody">
                                 <AnimatePresence>
                                     {filterData.slice(pageNumber*pageRow,pageNumber*pageRow +pageRow).map((row,i) => {
                                         return (
@@ -554,7 +554,7 @@ class MyTable extends Component {
                                     })}
                                 </AnimatePresence>
                             </tbody>
-                            <tfoot>
+                            <tfoot id="DataFilterTableTfoot">
                                 {/* Show Footer If True */}
                             </tfoot>
                         </table>
@@ -563,6 +563,7 @@ class MyTable extends Component {
                 </div>
                 {/* Pagination Start From Here */}
                 <div
+                    id="PaginationDataFilterTableDiv"
                     className="pagination row"
                     style={{
                         display: "flex",
