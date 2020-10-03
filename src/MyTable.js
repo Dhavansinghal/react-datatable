@@ -18,7 +18,7 @@ import FastRewindIcon from "@material-ui/icons/FastRewind";
 import PrintIcon from "@material-ui/icons/Print";
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
-
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 
 //Style For Select Tag
 const styles = (theme) => ({
@@ -27,6 +27,11 @@ const styles = (theme) => ({
         minWidth: 135,
         maxWidth: 150,
         float: "left",
+    },
+    row : {
+        '& > * ':{
+            width:'fit-content'
+        }
     },
     chips: {
         display: "flex",
@@ -443,14 +448,13 @@ class MyTable extends Component {
                 {/* Data Filter Options */}
                 <div
                     id="FilterOptionOuterMostDataFilterTableDiv"
-                    className="row"
+                    className="row MyTable-row-2" 
                     style={{
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "flex-end",
-                        padding: "0.5rem",
                     }}
-                    >
+                >
                     
                     {/* Show Hide Dropdown */}
                     <div className="FilterOptionDataFilterTableDiv">
@@ -507,6 +511,8 @@ class MyTable extends Component {
                 {/* Table Start From Here */}
                 <div id="DataFilterTableDiv">
                     <div id="printarea" className="table-responsive" >
+                        {filterData.length 
+                        ? 
                         <table id="DataFilterTableTable" className="table table-hover" style={{tableLayout:"fixed"}}>
                             <thead id="DataFilterTableThead">
                                 <tr>
@@ -558,13 +564,15 @@ class MyTable extends Component {
                                 {/* Show Footer If True */}
                             </tfoot>
                         </table>
-                        
+                        :
+                        <div id="NoRecordsFound"><ErrorOutlineIcon />No Records Found</div>
+                        }
                     </div>
                 </div>
                 {/* Pagination Start From Here */}
                 <div
                     id="PaginationDataFilterTableDiv"
-                    className="pagination row"
+                    className="pagination row  MyTable-row-2" 
                     style={{
                         display: "flex",
                         alignItems: "center",
@@ -609,7 +617,7 @@ class MyTable extends Component {
                             Record: <strong>{filterData.length > pageRow ? pageRow : filterData.length} of {filterData.length}</strong>
                         {" "}
                     </span>
-                    <span>
+                    <span >
                         {"   "}
                         <TextField
                             type="text"
@@ -649,10 +657,10 @@ class MyTable extends Component {
                             </MenuItem>
                         </Select>
                     </FormControl>
-                    </div>
+                </div>
                    
             </div>
         );
-    }
+    } 
 }
 export default withStyles(styles)(MyTable);
