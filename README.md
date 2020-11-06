@@ -10,6 +10,8 @@ this command is all you need to install the npm package in your project.<br/>
 Now you must be wonder about the depandancies <br/>
 it is where the sad part came, this npm package is only for react project till now <br/>
 and you need two preinstall npm packages to use this package this list of those package is given below:<br/>
+   <br/>
+   <br/>
 ["bootstrap": "^4.5.2"](https://www.npmjs.com/package/bootstrap) : install this package with `NPM install bootstrap` command <br/>
 ["framer-motion": "^2.6.0"](https://www.npmjs.com/package/framer-motion) : install this package with `NPM install framer-motion` command 
 
