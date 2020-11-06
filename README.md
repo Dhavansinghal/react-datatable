@@ -14,4 +14,13 @@ and you need two preinstall npm packages to use this package this list of those 
 ["framer-motion": "^2.6.0"](https://www.npmjs.com/package/framer-motion) : install this package with `NPM install framer-motion` command 
 
 
+## Don't Like The Table UI?
+
+although i tried my best to make the UI Good and simple at the sametime. this table is responsive as well. <br/>
+but if you still reading this than i think you don't like it, do you??<br/>
+you don't have to answer that question. Yes!! you can modify the design the way you want.<br/>
+for make this easy for you i attached a ID with almost every element. you can refer the Below Picture For that.
+
+
+
 **Note: raise and issue for any problem you face!**
