@@ -4,14 +4,15 @@ This is a NPM package for Tables, Created By [Dhavan Singhal](https://github.com
 
 With this NPM Package you can change your normal table with Datatable. Now You may be wonder what is a Datatable? the Datatable is a table with some filters like Search Option, Filter with date.<br/> that's it???<br/> No!! you can hide a row or you can print the table or you can export the table as a pdf file and also you can sort any row in asec and desc orders. 
 
-### `npm install React-Datatable`
+### How to use it
+<br/> 
 
+`npm install React-Datatable`
+<br/>
 this command is all you need to install the npm package in your project.<br/>
 Now you must be wonder about the depandancies <br/>
 it is where the sad part came, this npm package is only for react project till now <br/>
-and you need two preinstall npm packages to use this package this list of those package is given below:<br/>
-   <br/>
-<br/>
+and you need two preinstall npm packages to use this package the list of those package is given below:<br/>
    <br/>
 ["bootstrap": "^4.5.2"](https://www.npmjs.com/package/bootstrap) : install this package with `NPM install bootstrap` command <br/>
 i use this package for make the table responsive 
@@ -21,18 +22,19 @@ i use this package for make the table responsive
 i use this package for creating some animation ,if you wan you can skip this but for that you have to modify the package file.
 <br/><br/>
 
-# Don't Like The Table UI?
+## Don't Like The Table UI?
 
-although i tried my best to make the UI Good and simple at the sametime. this table is responsive as well. <br/>
-but if you still reading this than i think you don't like it, do you??<br/>
+although i tried my best to make the UI look Good and Simple. and this table is responsive as well. <br/>
+but if you still reading this than i think you don't like UI, do you??<br/>
 you don't have to answer that question. Yes!! you can modify the design the way you want.<br/>
-for make this easy for you i attached a ID with almost every element. you can refer the Below Picture For that.
+for make this process easy for you i attached an ID with almost every element. you can refer the Below Picture For that.
 
    <br/>
    <br/>
    <br/>
    '""Will add A Picture here""'
-
+  
+  ![Alt text](img/id_reference_images.jpg?raw=true "ID Reference")
 
 # How to use this
 
