@@ -75,15 +75,6 @@ const MenuProps = {
 };
 
 const initialColumnProps = [
-    // {
-    //     Header: "Delete",
-    //     Cell: ({ row }) => (
-    //         <Button block color="ghost-danger" value={row.original.id} onClick={this.deleteRow}>
-    //             <i className="fa fa-trash "></i>&nbsp;Delete
-    //         </Button>
-    //     ),
-    //     Filter: false
-    // },
     {
         Header: "Name",
         id: "name_id",
@@ -105,6 +96,14 @@ const initialColumnProps = [
         Filter: "daterange",
     },
 ];
+
+initialColumnProps.push({
+    Header: "Delete",
+    id:'delete_button'
+})
+
+
+
 
 const randomDate =()=> {
     let date = new Date(+(new Date()) - Math.floor(Math.random()*10000000000))
@@ -128,8 +127,10 @@ const initialDataProps = [
     ["Q", 451,"Done",randomDate()],
 ];
 
-
-
+//Add Id For Delete (Ask User to provide Unique Value And Check (Data.length == columns.length-1) )
+initialDataProps.forEach((item,inde) => {
+    item.push(inde)
+})
 
 class MyTable extends Component {
     constructor(props) {
@@ -177,6 +178,14 @@ class MyTable extends Component {
         }, 1000);
     };
 
+    //Delete A Row 
+    deleteRow = (event) => {
+        let index = parseInt(event.target.value)
+        var {filterData} = this.state
+        filterData = filterData.filter((row) => { return row[row.length-1] !== index})
+        this.setState({filterData})
+    }
+    
     //Sorting Functions
     getSortByToggleProps = (event) => {
 
@@ -436,11 +445,13 @@ class MyTable extends Component {
         })
     }
 
+
     render() {
         const {classes} = this.props;
         const {columns, filterData,pageNumber,pageRow,pageCount} = this.state;
         
         const {canNextPage, canPreviousPage} = this.state;
+        const rowDataLength = filterData[0].length;
         
         
         return (
@@ -470,6 +481,7 @@ class MyTable extends Component {
                                 onChange={this.showHideColumn}
                                 >
                                 {columns.map((column,index) => (
+                                    
                                     <MenuItem key={column.id} value={index}>
                                         <Checkbox checked={column.showHideCheck} />
                                         <ListItemText primary={column.Header} />
@@ -542,7 +554,7 @@ class MyTable extends Component {
                                                 animate={{opacity: 1,y:0}} 
                                                 exit={{ opacity: 0, y:-10 }}
                                             >
-                                                {row.map((cell,i) => {
+                                                {row.slice(0,rowDataLength-1).map((cell,i) => {
                                                     return (
                                                         <motion.td 
                                                             key={i} 
@@ -555,6 +567,16 @@ class MyTable extends Component {
                                                         </motion.td>
                                                     );
                                                 })}
+                                                <motion.td 
+                                                    style={{borderTop:'1px solid #c8ced3',display:columns[columns.length-1].showHideCheck ? "":"none" }}
+                                                    initial={{opacity: 0,y:-10}} 
+                                                    animate={{opacity: 1,y:0}} 
+                                                    exit={{ opacity: 0.4, y:-10 }}
+                                                >
+                                                    <button className="btn btn-outline-danger" value={row[rowDataLength-1]} onClick={this.deleteRow}>
+                                                        <i className="fa fa-trash"></i>&nbsp;Delete
+                                                    </button>                                       
+                                                </motion.td>
                                             </motion.tr>
                                         );
                                     })}
