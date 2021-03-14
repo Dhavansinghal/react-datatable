@@ -8,7 +8,8 @@ import withStyles from "@material-ui/core/styles/withStyles";
 
 import { Input,InputLabel,MenuItem ,FormControl,
         ListItemText,Select,Checkbox,TextField,
-        Button,IconButton
+        Button,IconButton,
+        Dialog,DialogTitle,DialogContent,DialogContentText,DialogActions
     } from "@material-ui/core";
 
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
@@ -102,7 +103,6 @@ initialColumnProps.push({
     id:'edit_button'
 })
 
-
 initialColumnProps.push({
     Header: "Delete",
     id:'delete_button'
@@ -155,6 +155,10 @@ class MyTable extends Component {
 
             //FilterArray
             filterValues: new Array(initialColumnProps.length).fill(null),
+
+            //ModelState
+            modalOpen:false,
+            modalData : []
         };
     }
 
@@ -186,10 +190,10 @@ class MyTable extends Component {
 
     //Delete A Row 
     deleteRow = (event) => {
-        let index = parseInt(event.target.value)
+        let primaryKey = parseInt(event.target.value)
         var {filterData} = this.state
         filterData = filterData.filter((row) => { 
-            if (row[row.length-1] !== index){
+            if (row[row.length-1] !== primaryKey){
                 return true
             }
             else {
@@ -200,31 +204,23 @@ class MyTable extends Component {
         this.setState({filterData})
     }
 
+    
+    //Modal
     //Edit Table Row 
     editRow = (event) => {
-        // console.log(event.currentTarget)
-        var childnodes = event.target.parentElement.parentElement.children 
-        
-        
-        event.target.parentElement.parentElement.style.backgroundColor = 'antiquewhite'
-        event.target.parentElement.children.push(<div><button class="btn btn-outline-success" onClick={this.editSaveButton} >
-                    &nbsp;Save</button> | <button class="btn btn-outline-warning" onClick={this.editCancelButton} value={event.target.value} >
-                &nbsp;Cancel
-            </button></div>  )  
-
-        for (var i = 0; i < childnodes.length - 2; i++) {
-            var tableChild = childnodes[i];
-            tableChild.setAttribute('contenteditable', true)
+        if(event.target){
+            var primaryKey = event.target.value;
+            var {filterData} = this.state
+            var selectedData = filterData.filter((row) => { return row[row.length-1] === primaryKey})
+            this.setState({modalData :selectedData})
         }
-        // document.getElementById("exampleModal").modal({show: true});
     }
-
-    editSaveButton  = (event) => { 
-        console.log("Hello MF", event.target.value)
+    modalHandleClose = () => {
+        this.setState({modalOpen:false})
     }
-
-    editCancelButton  = (event) => { 
-        console.log("Bye MF", event.target.value)
+    modalHandleOpen = (event) => {
+        this.editRow(event)
+        this.setState({modalOpen:true})
     }
 
     //Sorting Functions
@@ -614,7 +610,7 @@ class MyTable extends Component {
                                                     animate={{opacity: 1,y:0}} 
                                                     exit={{ opacity: 0.4, y:-10 }}
                                                 >
-                                                    <button className="btn btn-outline-warning" onClick={this.editRow} value={row[rowDataLength-1]} >
+                                                    <button className="btn btn-outline-warning" onClick={this.modalHandleOpen} value={row[rowDataLength-1]} >
                                                         <i className="fa fa-edit"></i>&nbsp;Edit
                                                     </button>                                       
                                                 </motion.td>
@@ -637,44 +633,38 @@ class MyTable extends Component {
                                 {/* Show Footer If True */}
                             </tfoot>
                          
-
                         </table>
-                          
                         :
                         <div id="NoRecordsFound"><ErrorOutlineIcon />No Records Found</div>
                         }
                     </div>
                     
-                    <div className="modal fade" id="exampleModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div className="modal-dialog" role="document">
-                                <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title" id="exampleModalLabel">New message</h5>
-                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div className="modal-body">
-                                    <form>
-                                        <div className="form-group">
-                                            <label htmlFor="recipient-name" className="col-form-label">Recipient:</label>
-                                            <input type="text" className="form-control" id="recipient-name" />
-                                        </div>
-                                        <div className="form-group">
-                                            <label htmlFor="message-text" className="col-form-label">Message:</label>
-                                            <textarea className="form-control" id="message-text"></textarea>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    <button type="button" className="btn btn-primary">Send message</button>
-                                </div>
-                                </div>
-                            </div>
-                        </div>
-
-
+                    <Dialog open={this.state.modalOpen} onClose={this.modalHandleClose} aria-labelledby="form-dialog-title">
+                        <DialogTitle id="form-dialog-title">Edit Table Data</DialogTitle>
+                        <DialogContent>
+                        {
+                            this.state.modalOpen ? 
+                             <h1>Hiii</h1>
+                            :null
+                        }
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            id="name"
+                            label="Email Address"
+                            type="email"
+                            fullWidth
+                        />
+                        </DialogContent>
+                        <DialogActions>
+                        <Button onClick={this.modalHandleClose} color="primary">
+                            Cancel
+                        </Button>
+                        <Button onClick={this.editRow} color="primary">
+                            Subscribe
+                        </Button>
+                        </DialogActions>
+                    </Dialog>
                 </div>
                 {/* Pagination Start From Here */}
                 <div
