@@ -136,6 +136,7 @@ const initialDataProps = [
 //Add Id For Delete (Ask User to provide Unique Value And Check (Data.length == columns.length-1) )
 initialDataProps.forEach((item,inde) => {
     item.push(inde)
+    item.push(false)
 })
 
 class MyTable extends Component {
@@ -189,11 +190,11 @@ class MyTable extends Component {
         let index = parseInt(event.target.value)
         var {filterData} = this.state
         filterData = filterData.filter((row) => { 
-            if (row[row.length-1] !== index){
+            if (row[row.length-2] !== index){
                 return true
             }
             else {
-                this.props.onDataDelete(row);
+                this.props.onDataDelete(row.slice(0,-1));
                 return false 
             }
         })
@@ -202,29 +203,55 @@ class MyTable extends Component {
 
     //Edit Table Row 
     editRow = (event) => {
-        // console.log(event.currentTarget)
+        var index = parseInt(event.target.value)
         var childnodes = event.target.parentElement.parentElement.children 
-        
+        var {filterData} = this.state
         
         event.target.parentElement.parentElement.style.backgroundColor = 'antiquewhite'
-        event.target.parentElement.children.push(<div><button class="btn btn-outline-success" onClick={this.editSaveButton} >
-                    &nbsp;Save</button> | <button class="btn btn-outline-warning" onClick={this.editCancelButton} value={event.target.value} >
-                &nbsp;Cancel
-            </button></div>  )  
+        
+        filterData.forEach((row) => { 
+            if (row[row.length-2] === index){
+                row[row.length-1] = true
+            }
+        })
+        this.setState({filterData})
+        // var x = document.createElement('button'); 
+        // x.classList.add('btn')
+        // x.classList.add('btn-outline-success')
+        // x.setAttribute('value', event.target.value)
+        // x.addEventListener('click', this.editSaveButton)
+        // x.innerHTML = 'Save';
+
+        // var y = document.createElement('span'); 
+        // y.innerHTML = ' | '
+
+        // var z = document.createElement('button'); 
+        // z.classList.add('btn')
+        // z.classList.add('btn-outline-warning')
+        // z.setAttribute('value', event.target.value)
+        // z.addEventListener('click', this.editCancelButton)
+        // z.innerHTML = 'Cancel';
+       
+        // event.target.parentElement.appendChild(x)
+        // event.target.parentElement.appendChild(y)
+        // event.target.parentElement.appendChild(z)
+        // event.target.parentElement.removeChild(event.target.parentElement.childNodes[0])
 
         for (var i = 0; i < childnodes.length - 2; i++) {
             var tableChild = childnodes[i];
             tableChild.setAttribute('contenteditable', true)
+            tableChild.addEventListener('keydown', this.editTableInput)
         }
-        // document.getElementById("exampleModal").modal({show: true});
     }
 
     editSaveButton  = (event) => { 
-        console.log("Hello MF", event.target.value)
+        console.log("Hello MF", event)
     }
-
     editCancelButton  = (event) => { 
         console.log("Bye MF", event.target.value)
+    }
+    editTableInput = (event) => { 
+        console.log("Bye MF", event.target.innerText)
     }
 
     //Sorting Functions
@@ -588,14 +615,14 @@ class MyTable extends Component {
                             </thead>
                             <tbody id="DataFilterTableTbody">
                                 <AnimatePresence>
-                                    {filterData.slice(pageNumber*pageRow,pageNumber*pageRow +pageRow).map((row,i) => {
+                                    {this.state.filterData.slice(pageNumber*pageRow,pageNumber*pageRow +pageRow).map((row,i) => {
                                         return (
                                             <motion.tr key={i} 
                                                 initial={{opacity: 0.4,y:-10}} 
                                                 animate={{opacity: 1,y:0}} 
                                                 exit={{ opacity: 0, y:-10 }}
                                             >
-                                                {row.slice(0,rowDataLength-1).map((cell,i) => {
+                                                {row.slice(0,rowDataLength-2).map((cell,i) => {
                                                     return (
                                                         <motion.td 
                                                             key={i} 
@@ -608,23 +635,42 @@ class MyTable extends Component {
                                                         </motion.td>
                                                     );
                                                 })}
+                                                {
+                                                    row[rowDataLength-1] ? 
+                                                    <motion.td 
+                                                    style={{borderTop:'1px solid #c8ced3',display:columns[columns.length-1].showHideCheck ? "":"none" }}
+                                                    initial={{opacity: 0,y:-10}} 
+                                                    animate={{opacity: 1,y:0}} 
+                                                    exit={{ opacity: 0.4, y:-10 }}
+                                                    >
+                                                        <button className="btn btn-outline-success" onClick={this.editSaveButton} value={row[rowDataLength-2]} >
+                                                            <i className="fa fa-edit"></i>&nbsp;Save
+                                                        </button>  
+                                                        &nbsp; | &nbsp; 
+                                                        <button className="btn btn-outline-warning" onClick={this.editCancelButton} value={row[rowDataLength-2]} >
+                                                            <i className="fa fa-edit"></i>&nbsp;Cancel
+                                                        </button>                                       
+                                                    </motion.td>
+                                                    :
+                                                    
+                                                    <motion.td 
+                                                    style={{borderTop:'1px solid #c8ced3',display:columns[columns.length-1].showHideCheck ? "":"none" }}
+                                                    initial={{opacity: 0,y:-10}} 
+                                                    animate={{opacity: 1,y:0}} 
+                                                    exit={{ opacity: 0.4, y:-10 }}
+                                                    >
+                                                        <button className="btn btn-outline-warning" onClick={this.editRow} value={row[rowDataLength-2]} >
+                                                            <i className="fa fa-edit"></i>&nbsp;Edit
+                                                        </button>                                       
+                                                    </motion.td>
+                                                }
                                                 <motion.td 
                                                     style={{borderTop:'1px solid #c8ced3',display:columns[columns.length-1].showHideCheck ? "":"none" }}
                                                     initial={{opacity: 0,y:-10}} 
                                                     animate={{opacity: 1,y:0}} 
                                                     exit={{ opacity: 0.4, y:-10 }}
                                                 >
-                                                    <button className="btn btn-outline-warning" onClick={this.editRow} value={row[rowDataLength-1]} >
-                                                        <i className="fa fa-edit"></i>&nbsp;Edit
-                                                    </button>                                       
-                                                </motion.td>
-                                                <motion.td 
-                                                    style={{borderTop:'1px solid #c8ced3',display:columns[columns.length-1].showHideCheck ? "":"none" }}
-                                                    initial={{opacity: 0,y:-10}} 
-                                                    animate={{opacity: 1,y:0}} 
-                                                    exit={{ opacity: 0.4, y:-10 }}
-                                                >
-                                                    <button className="btn btn-outline-danger" onClick={this.deleteRow} value={row[rowDataLength-1]} >
+                                                    <button className="btn btn-outline-danger" onClick={this.deleteRow} value={row[rowDataLength-2]} >
                                                         <i className="fa fa-trash"></i>&nbsp;Delete
                                                     </button>                                       
                                                 </motion.td>
