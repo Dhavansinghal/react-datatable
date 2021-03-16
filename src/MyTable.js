@@ -78,21 +78,25 @@ const initialColumnProps = [
     {
         Header: "Name",
         id: "name_id",
+        type:'text',
         Filter: "Search",
     },
     {
         Header: "Bori",
         id: "packages",
+        type:'number',
         Filter: false,
     },
     {
         Header: "Status",
         id: "status",
+        type:'text',
         Filter: "Dropdown",
     },
     {
         Header: "Date",
         id: "date",
+        type:'date',
         Filter: "daterange",
     },
 ];
@@ -189,6 +193,9 @@ class MyTable extends Component {
     deleteRow = (event) => {
         let index = parseInt(event.target.value)
         var {filterData} = this.state
+
+        event.target.parentElement.parentElement.style.backgroundColor = ''
+        
         filterData = filterData.filter((row) => { 
             if (row[row.length-2] !== index){
                 return true
@@ -204,10 +211,11 @@ class MyTable extends Component {
     //Edit Table Row 
     editRow = (event) => {
         var index = parseInt(event.target.value)
-        var childnodes = event.target.parentElement.parentElement.children 
+        var td = event.target.parentElement.parentElement
+        var childnodes = td.children 
         var {filterData} = this.state
         
-        event.target.parentElement.parentElement.style.backgroundColor = 'antiquewhite'
+        td.style.backgroundColor = 'antiquewhite'
         
         filterData.forEach((row) => { 
             if (row[row.length-2] === index){
@@ -215,44 +223,98 @@ class MyTable extends Component {
             }
         })
         this.setState({filterData})
-        // var x = document.createElement('button'); 
-        // x.classList.add('btn')
-        // x.classList.add('btn-outline-success')
-        // x.setAttribute('value', event.target.value)
-        // x.addEventListener('click', this.editSaveButton)
-        // x.innerHTML = 'Save';
 
-        // var y = document.createElement('span'); 
-        // y.innerHTML = ' | '
-
-        // var z = document.createElement('button'); 
-        // z.classList.add('btn')
-        // z.classList.add('btn-outline-warning')
-        // z.setAttribute('value', event.target.value)
-        // z.addEventListener('click', this.editCancelButton)
-        // z.innerHTML = 'Cancel';
-       
-        // event.target.parentElement.appendChild(x)
-        // event.target.parentElement.appendChild(y)
-        // event.target.parentElement.appendChild(z)
-        // event.target.parentElement.removeChild(event.target.parentElement.childNodes[0])
-
+        
         for (var i = 0; i < childnodes.length - 2; i++) {
             var tableChild = childnodes[i];
-            tableChild.setAttribute('contenteditable', true)
-            tableChild.addEventListener('keydown', this.editTableInput)
+            var tdData = tableChild.innerText;
+            tableChild.innerText = ''
+
+            var dataType = this.state.columns[i].type
+            var input = document.createElement("input");   
+            input.setAttribute('type', dataType)
+            if (dataType === 'number'){
+                input.setAttribute('step', 0.01)
+            }
+            else if (dataType === 'date'){
+                var tempDate ;
+                if(!isNaN(Date.parse(tdData))){  //Check Valid Date
+                    tempDate = new Date(tdData);
+                }else {
+                    tempDate = new Date();
+                }
+                
+                let m = (parseInt(tempDate.getMonth()) + 1) < 10 ? "0"+(parseInt(tempDate.getMonth()) + 1) : (parseInt(tempDate.getMonth()) + 1)
+                let d = tempDate.getDate() < 10 ? "0"+tempDate.getDate() : tempDate.getDate()
+                let y = tempDate.getFullYear()
+                tdData  =  y + "-" + m + "-" + d; 
+            }
+            input.style.textAlign = 'center'
+            input.setAttribute('value', tdData)
+
+            tableChild.appendChild(input);    
         }
     }
 
     editSaveButton  = (event) => { 
-        console.log("Hello MF", event)
+        var index = parseInt(event.target.value)
+        var td = event.target.parentElement.parentElement
+        var childnodes = td.children 
+        var {filterData} = this.state
+        var selectedRow = []
+        
+        for (var i = 0; i < childnodes.length - 2; i++) {
+            var tableChild = childnodes[i].firstElementChild;
+            selectedRow.push(tableChild.value)
+            childnodes[i].innerText = tableChild.value
+        }
+
+        filterData.forEach((row) => { 
+            if (row[row.length-2] === index){
+                row[row.length-1] = false
+                for (var i = 0; i < childnodes.length - 2; i++) {
+                    row[i] = selectedRow[i]
+                }
+
+                this.props.onDataEdit(row.slice(0,-1));
+            }
+        })
+        this.setState({filterData})
+
+        td.style.backgroundColor = 'aquamarine'
+        setTimeout(function(){
+            td.style.backgroundColor = ''
+        }, 3000);
+
     }
     editCancelButton  = (event) => { 
-        console.log("Bye MF", event.target.value)
+        var index = parseInt(event.target.value)
+        var td = event.target.parentElement.parentElement
+        var childnodes = td.children 
+        var {filterData} = this.state
+        var selectedRow = []
+        
+        td.style.backgroundColor = 'aliceblue'
+        setTimeout(function(){
+            td.style.backgroundColor = ''
+        }, 3000);
+        
+        
+        filterData.forEach((row) => { 
+            if (row[row.length-2] === index){
+                row[row.length-1] = false
+                selectedRow = row
+            }
+        })
+        this.setState({filterData})
+        
+        for (var i = 0; i < childnodes.length - 2; i++) {
+            var tableChild = childnodes[i];
+            tableChild.innerText = selectedRow[i]
+        }
     }
-    editTableInput = (event) => { 
-        console.log("Bye MF", event.target.innerText)
-    }
+
+  
 
     //Sorting Functions
     getSortByToggleProps = (event) => {
@@ -418,7 +480,7 @@ class MyTable extends Component {
 
         let min = initalTableData.length ? initalTableData[0][colIndex] : new Date()
         let max = initalTableData.length ? initalTableData[0][colIndex] : new Date()
-
+      
         initalTableData.forEach(row => {
             if (new Date(row[colIndex]).getTime() < new Date(min).getTime()) {
                 min = row[colIndex]
@@ -503,7 +565,7 @@ class MyTable extends Component {
                         }
                         break;
                     default:
-                        console.log("Unknown Filter");
+                        console.error("Unknown Filter");
                 }
             }
         })
@@ -519,7 +581,6 @@ class MyTable extends Component {
         const {columns, filterData,pageNumber,pageRow,pageCount} = this.state;
         
         const {canNextPage, canPreviousPage} = this.state;
-        const rowDataLength = filterData[0].length;
         
         
         return (
@@ -622,7 +683,7 @@ class MyTable extends Component {
                                                 animate={{opacity: 1,y:0}} 
                                                 exit={{ opacity: 0, y:-10 }}
                                             >
-                                                {row.slice(0,rowDataLength-2).map((cell,i) => {
+                                                {row.slice(0,row.length-2).map((cell,i) => {
                                                     return (
                                                         <motion.td 
                                                             key={i} 
@@ -630,24 +691,25 @@ class MyTable extends Component {
                                                             initial={{opacity: 0,y:-10}} 
                                                             animate={{opacity: 1,y:0}} 
                                                             exit={{ opacity: 0.4, y:-10 }}
+                                                            type={columns[i].type}
                                                         >
                                                             {cell}
                                                         </motion.td>
                                                     );
                                                 })}
                                                 {
-                                                    row[rowDataLength-1] ? 
+                                                    row[row.length-1] ? 
                                                     <motion.td 
                                                     style={{borderTop:'1px solid #c8ced3',display:columns[columns.length-1].showHideCheck ? "":"none" }}
                                                     initial={{opacity: 0,y:-10}} 
                                                     animate={{opacity: 1,y:0}} 
                                                     exit={{ opacity: 0.4, y:-10 }}
                                                     >
-                                                        <button className="btn btn-outline-success" onClick={this.editSaveButton} value={row[rowDataLength-2]} >
+                                                        <button className="btn btn-outline-success" onClick={this.editSaveButton} value={row[row.length-2]} >
                                                             <i className="fa fa-edit"></i>&nbsp;Save
                                                         </button>  
                                                         &nbsp; | &nbsp; 
-                                                        <button className="btn btn-outline-warning" onClick={this.editCancelButton} value={row[rowDataLength-2]} >
+                                                        <button className="btn btn-outline-warning" onClick={this.editCancelButton} value={row[row.length-2]} >
                                                             <i className="fa fa-edit"></i>&nbsp;Cancel
                                                         </button>                                       
                                                     </motion.td>
@@ -659,7 +721,7 @@ class MyTable extends Component {
                                                     animate={{opacity: 1,y:0}} 
                                                     exit={{ opacity: 0.4, y:-10 }}
                                                     >
-                                                        <button className="btn btn-outline-warning" onClick={this.editRow} value={row[rowDataLength-2]} >
+                                                        <button className="btn btn-outline-warning" onClick={this.editRow} value={row[row.length-2]} >
                                                             <i className="fa fa-edit"></i>&nbsp;Edit
                                                         </button>                                       
                                                     </motion.td>
@@ -670,7 +732,7 @@ class MyTable extends Component {
                                                     animate={{opacity: 1,y:0}} 
                                                     exit={{ opacity: 0.4, y:-10 }}
                                                 >
-                                                    <button className="btn btn-outline-danger" onClick={this.deleteRow} value={row[rowDataLength-2]} >
+                                                    <button className="btn btn-outline-danger" onClick={this.deleteRow} value={row[row.length-2]} >
                                                         <i className="fa fa-trash"></i>&nbsp;Delete
                                                     </button>                                       
                                                 </motion.td>

@@ -79,21 +79,25 @@ const initialColumnProps = [
     {
         Header: "Name",
         id: "name_id",
+        type : 'text',
         Filter: "Search",
     },
     {
         Header: "Bori",
         id: "packages",
+        type : 'number',
         Filter: false,
     },
     {
         Header: "Status",
         id: "status",
+        type : 'text',
         Filter: "Dropdown",
     },
     {
         Header: "Date",
         id: "date",
+        type : 'date',
         Filter: "daterange",
     },
 ];
@@ -599,6 +603,7 @@ class MyTable extends Component {
                                                             initial={{opacity: 0,y:-10}} 
                                                             animate={{opacity: 1,y:0}} 
                                                             exit={{ opacity: 0.4, y:-10 }}
+                                                            type={{"columns[i].type"}}
                                                         >
                                                             {cell}
                                                         </motion.td>

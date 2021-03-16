@@ -8,13 +8,18 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-        dataDelete : ['as',12,'asdf']
+        dataDelete : ['as',12,'asdf'],
+        dataEdit :  ['as',12,'asdf'],
     };
 }
 
   handleDataDelete = (data) => {
     this.setState({dataDelete : data})
   }
+
+  handleDataEdit = (data) => {
+    this.setState({dataEdit : data})
+  } 
 
   render() {
     return (
@@ -28,7 +33,7 @@ class App extends Component {
         >
           React Data Filter Table
         </motion.h1>
-        <MyTable onDataDelete={this.handleDataDelete} />
+        <MyTable onDataDelete={this.handleDataDelete} onDataEdit={this.handleDataEdit} />
         <div>
           <motion.p
             className="fontFamily text-info"
@@ -40,7 +45,8 @@ class App extends Component {
             Doc Will Be Available Soon. please share feedbacks
           </motion.p>
         </div>
-        <div>{JSON.stringify(this.state.dataDelete)}</div>
+        <div>Deleted : {JSON.stringify(this.state.dataDelete)}</div>
+        <div>Edited : {JSON.stringify(this.state.dataEdit)}</div>
       </div>
     );
   }
