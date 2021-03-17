@@ -90,7 +90,7 @@ const initialColumnProps = [
     {
         Header: "Status",
         id: "status",
-        type:'text',
+        type:'sect',
         Filter: "Dropdown",
     },
     {
@@ -231,28 +231,67 @@ class MyTable extends Component {
             tableChild.innerText = ''
 
             var dataType = this.state.columns[i].type
-            var input = document.createElement("input");   
-            input.setAttribute('type', dataType)
-            if (dataType === 'number'){
-                input.setAttribute('step', 0.01)
-            }
-            else if (dataType === 'date'){
-                var tempDate ;
-                if(!isNaN(Date.parse(tdData))){  //Check Valid Date
-                    tempDate = new Date(tdData);
-                }else {
-                    tempDate = new Date();
+            
+            if(dataType === 'select') {
+                let daata = tdData
+                const select = document.createElement("select"); 
+                if(this.state.columns[i].option){
+                    this.state.columns[i].option.forEach((val) => {
+                        var option = document.createElement("option")
+                        option.innerText = val
+                        option.setAttribute('value', val);
+                        if (val === daata){
+                            option.selected = true;
+                        }
+                        select.appendChild(option)
+                    });
                 }
-                
-                let m = (parseInt(tempDate.getMonth()) + 1) < 10 ? "0"+(parseInt(tempDate.getMonth()) + 1) : (parseInt(tempDate.getMonth()) + 1)
-                let d = tempDate.getDate() < 10 ? "0"+tempDate.getDate() : tempDate.getDate()
-                let y = tempDate.getFullYear()
-                tdData  =  y + "-" + m + "-" + d; 
+                else {
+                    let index = i;
+                    let daata = tdData
+                    const distinctValues = [];
+                    filterData.forEach((row) => {
+                        if(!distinctValues.includes(row[index])){
+                            distinctValues.push(row[index])
+                            var option = document.createElement("option")
+                            option.innerText = row[index]
+                            option.setAttribute('value', row[index]);
+                            if (row[index] === daata){
+                                option.selected = true;
+                            }
+                            select.appendChild(option)
+                        }
+                    });
+                }
+                select.style.textAlign = 'center'
+                select.setAttribute('value', tdData)
+                tableChild.appendChild(select);  
             }
-            input.style.textAlign = 'center'
-            input.setAttribute('value', tdData)
+            else {
+                var input = document.createElement("input");   
+                input.setAttribute('type', dataType)
+                if (dataType === 'number'){
+                    input.setAttribute('step', 0.01)
+                }
+                else if (dataType === 'date'){
+                    var tempDate ;
+                    if(!isNaN(Date.parse(tdData))){  //Check Valid Date
+                        tempDate = new Date(tdData);
+                    }else {
+                        tempDate = new Date();
+                    }
+                    
+                    let m = (parseInt(tempDate.getMonth()) + 1) < 10 ? "0"+(parseInt(tempDate.getMonth()) + 1) : (parseInt(tempDate.getMonth()) + 1)
+                    let d = tempDate.getDate() < 10 ? "0"+tempDate.getDate() : tempDate.getDate()
+                    let y = tempDate.getFullYear()
+                    tdData  =  y + "-" + m + "-" + d; 
+                }
+                input.style.textAlign = 'center'
+                input.setAttribute('value', tdData)
 
-            tableChild.appendChild(input);    
+                tableChild.appendChild(input);  
+            }
+              
         }
     }
 
