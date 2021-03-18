@@ -74,103 +74,74 @@ const MenuProps = {
     },
 };
 
-const initialColumnProps = [
-    {
-        Header: "Name",
-        id: "name_id",
-        type:'text',
-        Filter: "Search",
-    },
-    {
-        Header: "Bori",
-        id: "packages",
-        type:'number',
-        Filter: false,
-    },
-    {
-        Header: "Status",
-        id: "status",
-        type:'sect',
-        Filter: "Dropdown",
-    },
-    {
-        Header: "Date",
-        id: "date",
-        type:'date',
-        Filter: "daterange",
-    },
-];
 
-initialColumnProps.push({
-    Header: "Edit",
-    id:'edit_button'
-})
-
-
-initialColumnProps.push({
-    Header: "Delete",
-    id:'delete_button'
-})
-
-
-
-
-const randomDate =()=> {
-    let date = new Date(+(new Date()) - Math.floor(Math.random()*10000000000))
-
-    return date.getFullYear()+"-"+date.getMonth()+"-"+date.getDay()
-}
-
-const initialDataProps = [
-    ["I", 4560,"Pending",randomDate()],
-    ["A", 451,"Pending",randomDate()],
-    ["C", 451,"Done",randomDate()],
-    ["Dhavan", 451,"Done",randomDate()],
-    ["E", 451,"Pending",randomDate()],
-    ["F", 451,"Done",randomDate()],
-    ["G", 451,"Done",randomDate()],
-    ["H", 451,"Pending",randomDate()],
-    ["Z", 451,"Done",randomDate()],
-    ["X", 451,"Pending",randomDate()],
-    ["Y", 451,"Pending",randomDate()],
-    ["W", 451,"Done",randomDate()],
-    ["Q", 451,"Done",randomDate()],
-];
-
-//Add Id For Delete (Ask User to provide Unique Value And Check (Data.length == columns.length-1) )
-initialDataProps.forEach((item,inde) => {
-    item.push(inde)
-    item.push(false)
-})
 
 class MyTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            columns: initialColumnProps,
-            initalTableData: initialDataProps,
-            filterData: initialDataProps,
+            columns: this.props.columns,
+            initalTableData: this.props.data,
+            filterData: this.props.data,
 
             //PaginationVariables
             pageRow: 5,
             pageNumber: 0,
-            pageCount:Math.ceil(initialDataProps.length/5),
+            pageCount:Math.ceil(this.props.data.length/5),
             canPreviousPage:false,
             canNextPage:true,
 
             //FilterArray
-            filterValues: new Array(initialColumnProps.length).fill(null),
+            filterValues: new Array(this.props.data.length).fill(null),
+
+            //ErrorHandlers
+            errorMessage : "",
+            isError:false
         };
     }
 
     componentDidMount(){
-        const {columns} = this.state;
+        const {columns,initalTableData} = this.state;
+        //Error Handlers
+        if(!columns.length){
+            this.setState({
+                isError:true,
+                errorMessage:"Columns Object should Not Be Empty."
+            })
+        }
+        if(initalTableData.length > 0){
+            if(columns.length){
+                if(initalTableData[0].length !== columns.length+1){
+                    this.setState({
+                        isError:true,
+                        errorMessage:"Each Data Object Row Should Have a extra column that represent that row uniquely."
+                    })
+                }
+            }
+        }
+
+        //Add False For Save Button in data
+        initalTableData.forEach((item) => {
+            item.push(false)
+        })
+          
+        //Add Edit And Delete Columns
+        columns.push({
+            Header: "Edit",
+            id:'edit_button'
+        })        
+        columns.push({
+            Header: "Delete",
+            id:'delete_button'
+        })
+
         columns.forEach(col => {
             col['showHideCheck'] = true;
             col['SortedDircDesc'] = false;
             col['sortIconShow'] = false;
         });
-        this.setState({columns})
+
+        this.setState({columns,initalTableData,filterData:initalTableData})
     }
 
     print = () => {
@@ -201,7 +172,10 @@ class MyTable extends Component {
                 return true
             }
             else {
-                this.props.onDataDelete(row.slice(0,-1));
+                if (this.props.onDataDelete){
+                    this.props.onDataDelete(row.slice(0,-1));
+                }
+                
                 return false 
             }
         })
@@ -314,8 +288,9 @@ class MyTable extends Component {
                 for (var i = 0; i < childnodes.length - 2; i++) {
                     row[i] = selectedRow[i]
                 }
-
-                this.props.onDataEdit(row.slice(0,-1));
+                if (this.props.onDataEdit){
+                    this.props.onDataEdit(row.slice(0,-1));
+                }
             }
         })
         this.setState({filterData})
@@ -529,6 +504,20 @@ class MyTable extends Component {
             }
         })
 
+        if(!isNaN(Date.parse(min))){  //Check Valid Date and Change Format
+            min = new Date(min)
+            let m = (parseInt(min.getMonth()) + 1) < 10 ? "0"+(parseInt(min.getMonth()) + 1) : (parseInt(min.getMonth()) + 1)
+            let d = min.getDate() < 10 ? "0"+min.getDate() : min.getDate()
+            let y = min.getFullYear()
+            min  =  y + "-" + m + "-" + d; 
+        } 
+        if(!isNaN(Date.parse(max))){  //Check Valid Date and Change Format
+            max = new Date(max)
+            let m = (parseInt(max.getMonth()) + 1) < 10 ? "0"+(parseInt(max.getMonth()) + 1) : (parseInt(max.getMonth()) + 1)
+            let d = max.getDate() < 10 ? "0"+max.getDate() : max.getDate()
+            let y = max.getFullYear()
+            max  =  y + "-" + m + "-" + d; 
+        }
         return (
             <div
                 style={{
@@ -623,6 +612,9 @@ class MyTable extends Component {
         
         
         return (
+            <div>
+            {!this.state.isError 
+            ?
             <div className="container-fluid" id="OuterMostDataDilterTableDiv">
                 {/* Data Filter Options */}
                 <div
@@ -912,12 +904,13 @@ class MyTable extends Component {
                         </Select>
                     </FormControl>
                 </div>
-                   
-                
-                
-
             </div>
-        );
+        
+            :
+             <p>{this.state.errorMessage}</p>
+            } 
+            </div>               
+            );
     } 
 }
 export default withStyles(styles)(MyTable);

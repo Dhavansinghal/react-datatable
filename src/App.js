@@ -3,15 +3,73 @@ import "./App.css";
 import MyTable from "./MyTable";
 import { motion } from "framer-motion";
 
+const initialColumnProps = [
+  {
+      Header: "Name",
+      id: "name_id",
+      type:'text',
+      Filter: "Search",
+  },
+  {
+      Header: "Bori",
+      id: "packages",
+      type:'number',
+      Filter: false,
+  },
+  {
+      Header: "Status",
+      id: "status",
+      type:'sect',
+      Filter: "Dropdown",
+  },
+  {
+      Header: "Date",
+      id: "date",
+      type:'date',
+      Filter: "daterange",
+  },
+];
+
+const randomDate =()=> {
+  let date = new Date(+(new Date()) - Math.floor(Math.random()*10000000000))
+
+  return date.getFullYear()+"-"+date.getMonth()+"-"+date.getDay()
+}
+
+const initialDataProps = [
+  ["I", 4560,"Pending",randomDate()],
+  ["A", 451,"Pending",randomDate()],
+  ["C", 451,"Done",randomDate()],
+  ["Dhavan", 451,"Done",randomDate()],
+  ["E", 451,"Pending",randomDate()],
+  ["F", 451,"Done",randomDate()],
+  ["G", 451,"Done",randomDate()],
+  ["H", 451,"Pending",randomDate()],
+  ["Z", 451,"Done",randomDate()],
+  ["X", 451,"Pending",randomDate()],
+  ["Y", 451,"Pending",randomDate()],
+  ["W", 451,"Done",randomDate()],
+  ["Q", 451,"Done",randomDate()],
+];
+
+
+//Add Id For Delete (Ask User to provide Unique Value And Check (Data.length == columns.length-1) )
+initialDataProps.forEach((item,inde) => {
+  item.push(inde)
+})
+
+
 class App extends Component {
 
+  
+
   constructor(props) {
-    super(props);
-    this.state = {
-        dataDelete : ['as',12,'asdf'],
-        dataEdit :  ['as',12,'asdf'],
-    };
-}
+      super(props);
+      this.state = {
+          dataDelete : ['as',12,'asdf'],
+          dataEdit :  ['as',12,'asdf'],
+      };
+  }
 
   handleDataDelete = (data) => {
     this.setState({dataDelete : data})
@@ -33,7 +91,16 @@ class App extends Component {
         >
           React Data Filter Table
         </motion.h1>
-        <MyTable onDataDelete={this.handleDataDelete} onDataEdit={this.handleDataEdit} />
+
+
+        <MyTable 
+        // onDataDelete={this.handleDataDelete} 
+        // onDataEdit={this.handleDataEdit} 
+        columns={initialColumnProps}
+        data={initialDataProps}
+        />
+
+
         <div>
           <motion.p
             className="fontFamily text-info"
