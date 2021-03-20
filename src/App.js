@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import "./App.css";
-import MyTable from "./MyTable";
+import MyTable from "./MyTableBeforeManualEditDeleteOption";
 import { motion } from "framer-motion";
 
 const initialColumnProps = [
@@ -19,8 +19,9 @@ const initialColumnProps = [
   {
       Header: "Status",
       id: "status",
-      type:'sect',
+      type:'select',
       Filter: "Dropdown",
+      option:["hi","ds","dw"]
   },
   {
       Header: "Date",
@@ -94,10 +95,12 @@ class App extends Component {
 
 
         <MyTable 
-        // onDataDelete={this.handleDataDelete} 
-        // onDataEdit={this.handleDataEdit} 
+        onDataDelete={this.handleDataDelete} 
+        onDataEdit={this.handleDataEdit} 
         columns={initialColumnProps}
         data={initialDataProps}
+        editButton={true}
+        deleteButton={true}
         />
 
 

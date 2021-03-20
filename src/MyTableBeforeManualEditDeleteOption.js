@@ -96,78 +96,53 @@ class MyTable extends Component {
 
             //ErrorHandlers
             errorMessage : "",
-            isError:false,
-
-            //Buttons
-            buttonEditable:0,
-            contentEditable:0,
-            editButton: this.props.hasOwnProperty('editButton') ? this.props.editButton : true,
-            deleteButton: this.props.hasOwnProperty('deleteButton') ? this.props.deleteButton : true,
+            isError:false
         };
-        
-        // inital Change in Data
+    }
+
+    componentDidMount(){
         const {columns,initalTableData} = this.state;
-        const {editButton,deleteButton} = this.state;
-        var buttonEditable = 0
-        var contentEditable = 0
-        
         //Error Handlers
         if(!columns.length){
-            this.state.isError= true
-            this.state.errorMessage="Columns Object should Not Be Empty."
-           
+            this.setState({
+                isError:true,
+                errorMessage:"Columns Object should Not Be Empty."
+            })
         }
         if(initalTableData.length > 0){
             if(columns.length){
-                if (editButton || deleteButton){
-                    if(initalTableData[0].length !== (columns.length+1)){
-                        this.state.isError= true
-                        this.state.errorMessage="Each Data Object Row Should Have a extra column that represent that row uniquely."
-                        console.error("Each Data Object Row Should Have a extra column that represent that row uniquely. it will help in Delete or Edit operations")
-                    }
+                if(initalTableData[0].length !== columns.length+1){
+                    this.setState({
+                        isError:true,
+                        errorMessage:"Each Data Object Row Should Have a extra column that represent that row uniquely."
+                    })
                 }
             }
         }
 
+        //Add False For Save Button in data
+        initalTableData.forEach((item) => {
+            item.push(false)
+        })
+          
         //Add Edit And Delete Columns
-        if(deleteButton){
-            buttonEditable += 1
-            contentEditable = 1
-        }
-        if(editButton){
-            buttonEditable += 1
-            contentEditable = 2
-            columns.push({
-                Header: "Edit",
-                id:'edit_button'
-            })     
-            //Add False For Save Button show/hide in table
-            initalTableData.forEach((item) => {
-                item.push(false)
-            })
-        }
-        if(deleteButton){
-            columns.push({
-                Header: "Delete",
-                id:'delete_button'
-            })
-        }
-         
+        columns.push({
+            Header: "Edit",
+            id:'edit_button'
+        })        
+        columns.push({
+            Header: "Delete",
+            id:'delete_button'
+        })
+
         columns.forEach(col => {
             col['showHideCheck'] = true;
             col['SortedDircDesc'] = false;
             col['sortIconShow'] = false;
         });
-        
 
-        this.state.columns = columns
-        this.state.initalTableData = initalTableData
-        this.state.filterData = initalTableData
-        this.state.buttonEditable = buttonEditable
-        this.state.contentEditable = contentEditable
+        this.setState({columns,initalTableData,filterData:initalTableData})
     }
-
-
 
     print = () => {
         var content = document.getElementById("printarea");
@@ -188,35 +163,23 @@ class MyTable extends Component {
     //Delete A Row 
     deleteRow = (event) => {
         let index = parseInt(event.target.value)
-        var {filterData,buttonEditable,initalTableData,contentEditable} = this.state
+        var {filterData} = this.state
 
         event.target.parentElement.parentElement.style.backgroundColor = ''
         
         filterData = filterData.filter((row) => { 
-            if (row[row.length-buttonEditable] !== index){
+            if (row[row.length-2] !== index){
                 return true
             }
             else {
-                if(row[row.length-contentEditable]){
-                    this.editCancelButton(event)
-                }
-
                 if (this.props.onDataDelete){
-                    if(this.state.editButton){
-                        this.props.onDataDelete(row.slice(0,-1));
-                    }
-                    else {
-                        this.props.onDataDelete(row)
-                    }
+                    this.props.onDataDelete(row.slice(0,-1));
                 }
                 
                 return false 
             }
         })
-        initalTableData  = initalTableData.filter((row) => { 
-            return (row[row.length-buttonEditable] !== index)
-        })
-        this.setState({filterData,initalTableData})
+        this.setState({filterData})
     }
 
     //Edit Table Row 
@@ -224,23 +187,19 @@ class MyTable extends Component {
         var index = parseInt(event.target.value)
         var td = event.target.parentElement.parentElement
         var childnodes = td.children 
-        var {filterData,buttonEditable,initalTableData,contentEditable} = this.state
+        var {filterData} = this.state
         
         td.style.backgroundColor = 'antiquewhite'
+        
         filterData.forEach((row) => { 
-            if (row[row.length-contentEditable] === index){
+            if (row[row.length-2] === index){
                 row[row.length-1] = true
             }
         })
-        initalTableData.forEach((row) => { 
-            if (row[row.length-contentEditable] === index){
-                row[row.length-1] = true
-            }
-        })
-        this.setState({filterData,initalTableData})
+        this.setState({filterData})
 
         
-        for (var i = 0; i < childnodes.length - buttonEditable; i++) {
+        for (var i = 0; i < childnodes.length - 2; i++) {
             var tableChild = childnodes[i];
             var tdData = tableChild.innerText;
             tableChild.innerText = ''
@@ -314,19 +273,19 @@ class MyTable extends Component {
         var index = parseInt(event.target.value)
         var td = event.target.parentElement.parentElement
         var childnodes = td.children 
-        var {filterData,buttonEditable,initalTableData,contentEditable} = this.state
+        var {filterData} = this.state
         var selectedRow = []
         
-        for (var i = 0; i < childnodes.length - buttonEditable; i++) {
+        for (var i = 0; i < childnodes.length - 2; i++) {
             var tableChild = childnodes[i].firstElementChild;
             selectedRow.push(tableChild.value)
             childnodes[i].innerText = tableChild.value
         }
 
         filterData.forEach((row) => { 
-            if (row[row.length-contentEditable] === index){
+            if (row[row.length-2] === index){
                 row[row.length-1] = false
-                for (var i = 0; i < childnodes.length - buttonEditable; i++) {
+                for (var i = 0; i < childnodes.length - 2; i++) {
                     row[i] = selectedRow[i]
                 }
                 if (this.props.onDataEdit){
@@ -334,16 +293,7 @@ class MyTable extends Component {
                 }
             }
         })
-        initalTableData.forEach((row) => { 
-            if (row[row.length-contentEditable] === index){
-                row[row.length-1] = false
-                for (var i = 0; i < childnodes.length - buttonEditable; i++) {
-                    row[i] = selectedRow[i]
-                }
-            }
-        })
-
-        this.setState({filterData,initalTableData})
+        this.setState({filterData})
 
         td.style.backgroundColor = 'aquamarine'
         setTimeout(function(){
@@ -355,7 +305,7 @@ class MyTable extends Component {
         var index = parseInt(event.target.value)
         var td = event.target.parentElement.parentElement
         var childnodes = td.children 
-        var {filterData,buttonEditable,initalTableData,contentEditable} = this.state
+        var {filterData} = this.state
         var selectedRow = []
         
         td.style.backgroundColor = 'aliceblue'
@@ -365,20 +315,14 @@ class MyTable extends Component {
         
         
         filterData.forEach((row) => { 
-            if (row[row.length-contentEditable] === index){
+            if (row[row.length-2] === index){
                 row[row.length-1] = false
                 selectedRow = row
             }
         })
-        initalTableData.forEach((row) => { 
-            if (row[row.length-contentEditable] === index){
-                row[row.length-1] = false
-                selectedRow = row
-            }
-        })
-        this.setState({filterData,initalTableData})
+        this.setState({filterData})
         
-        for (var i = 0; i < childnodes.length - buttonEditable; i++) {
+        for (var i = 0; i < childnodes.length - 2; i++) {
             var tableChild = childnodes[i];
             tableChild.innerText = selectedRow[i]
         }
@@ -663,8 +607,9 @@ class MyTable extends Component {
     render() {
         const {classes} = this.props;
         const {columns, filterData,pageNumber,pageRow,pageCount} = this.state;
-        const {editButton,deleteButton,contentEditable} = this.state;
+        
         const {canNextPage, canPreviousPage} = this.state;
+        
         
         return (
             <div>
@@ -769,7 +714,7 @@ class MyTable extends Component {
                                                 animate={{opacity: 1,y:0}} 
                                                 exit={{ opacity: 0, y:-10 }}
                                             >
-                                                {row.slice(0,row.length-contentEditable).map((cell,i) => {
+                                                {row.slice(0,row.length-2).map((cell,i) => {
                                                     return (
                                                         <motion.td 
                                                             key={i} 
@@ -784,7 +729,6 @@ class MyTable extends Component {
                                                     );
                                                 })}
                                                 {
-                                                editButton ?
                                                     row[row.length-1] ? 
                                                     <motion.td 
                                                     style={{borderTop:'1px solid #c8ced3',display:columns[columns.length-1].showHideCheck ? "":"none" }}
@@ -792,11 +736,11 @@ class MyTable extends Component {
                                                     animate={{opacity: 1,y:0}} 
                                                     exit={{ opacity: 0.4, y:-10 }}
                                                     >
-                                                        <button className="btn btn-outline-success" onClick={this.editSaveButton} value={row[row.length-contentEditable]} >
+                                                        <button className="btn btn-outline-success" onClick={this.editSaveButton} value={row[row.length-2]} >
                                                             <i className="fa fa-edit"></i>&nbsp;Save
                                                         </button>  
                                                         &nbsp; | &nbsp; 
-                                                        <button className="btn btn-outline-warning" onClick={this.editCancelButton} value={row[row.length-contentEditable]} >
+                                                        <button className="btn btn-outline-warning" onClick={this.editCancelButton} value={row[row.length-2]} >
                                                             <i className="fa fa-edit"></i>&nbsp;Cancel
                                                         </button>                                       
                                                     </motion.td>
@@ -808,27 +752,21 @@ class MyTable extends Component {
                                                     animate={{opacity: 1,y:0}} 
                                                     exit={{ opacity: 0.4, y:-10 }}
                                                     >
-                                                        <button className="btn btn-outline-warning" onClick={this.editRow} value={row[row.length-contentEditable]} >
+                                                        <button className="btn btn-outline-warning" onClick={this.editRow} value={row[row.length-2]} >
                                                             <i className="fa fa-edit"></i>&nbsp;Edit
                                                         </button>                                       
                                                     </motion.td>
-                                                :
-                                                null
                                                 }
-                                                {
-                                                deleteButton?
                                                 <motion.td 
                                                     style={{borderTop:'1px solid #c8ced3',display:columns[columns.length-1].showHideCheck ? "":"none" }}
                                                     initial={{opacity: 0,y:-10}} 
                                                     animate={{opacity: 1,y:0}} 
                                                     exit={{ opacity: 0.4, y:-10 }}
                                                 >
-                                                    <button className="btn btn-outline-danger" onClick={this.deleteRow} value={row[row.length-contentEditable]} >
+                                                    <button className="btn btn-outline-danger" onClick={this.deleteRow} value={row[row.length-2]} >
                                                         <i className="fa fa-trash"></i>&nbsp;Delete
                                                     </button>                                       
                                                 </motion.td>
-                                                :null
-                                                }
                                             </motion.tr>
                                         );
                                     })}
@@ -842,9 +780,40 @@ class MyTable extends Component {
                         </table>
                           
                         :
-                        <div id="NoRecordsFound" style={{margin:'2%',fontSize:'25px'}}><ErrorOutlineIcon />&nbsp;No Records Found</div>
+                        <div id="NoRecordsFound"><ErrorOutlineIcon />No Records Found</div>
                         }
                     </div>
+                    
+                    <div className="modal fade" id="exampleModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div className="modal-dialog" role="document">
+                                <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title" id="exampleModalLabel">New message</h5>
+                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    <form>
+                                        <div className="form-group">
+                                            <label htmlFor="recipient-name" className="col-form-label">Recipient:</label>
+                                            <input type="text" className="form-control" id="recipient-name" />
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="message-text" className="col-form-label">Message:</label>
+                                            <textarea className="form-control" id="message-text"></textarea>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" className="btn btn-primary">Send message</button>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+
+
                 </div>
                 {/* Pagination Start From Here */}
                 <div
@@ -938,9 +907,7 @@ class MyTable extends Component {
             </div>
         
             :
-            
-                <div id="SomeErrorInInitalData" style={{margin:'2%',fontSize:'25px'}}><ErrorOutlineIcon />&nbsp;{this.state.errorMessage}</div>
-                 
+             <p>{this.state.errorMessage}</p>
             } 
             </div>               
             );
