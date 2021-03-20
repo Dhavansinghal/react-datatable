@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import "./App.css";
-import MyTable from "./MyTableBeforeManualEditDeleteOption";
+import MyTable from "./MyTable";
 import { motion } from "framer-motion";
 
 const initialColumnProps = [
