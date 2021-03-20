@@ -123,7 +123,14 @@ class MyTable extends Component {
                     if(initalTableData[0].length !== (columns.length+1)){
                         this.state.isError= true
                         this.state.errorMessage="Each Data Object Row Should Have a extra column that represent that row uniquely."
-                        console.error("Each Data Object Row Should Have a extra column that represent that row uniquely. it will help in Delete or Edit operations")
+                        console.error("Each Data Object Row Should Have a extra column that represent that row uniquely. it will help in Delete or Edit operations (primary key)")
+                    }
+                }
+                else {
+                    if(initalTableData[0].length !== columns.length){
+                        this.state.isError= true
+                        this.state.errorMessage="If editButton or deleteButton set To False than column and data length should be Equal."
+                        console.error("If editButton or deleteButton set To False than column and data length should be Equal. No need to provide extra data (primary key)")
                     }
                 }
             }
@@ -665,7 +672,6 @@ class MyTable extends Component {
         const {columns, filterData,pageNumber,pageRow,pageCount} = this.state;
         const {editButton,deleteButton,contentEditable} = this.state;
         const {canNextPage, canPreviousPage} = this.state;
-        
         return (
             <div>
             {!this.state.isError 
@@ -769,15 +775,15 @@ class MyTable extends Component {
                                                 animate={{opacity: 1,y:0}} 
                                                 exit={{ opacity: 0, y:-10 }}
                                             >
-                                                {row.slice(0,row.length-contentEditable).map((cell,i) => {
+                                                {row.slice(0,row.length-contentEditable).map((cell,index) => {
                                                     return (
                                                         <motion.td 
-                                                            key={i} 
-                                                            style={{borderTop:'1px solid #c8ced3',display:columns[i].showHideCheck ? "":"none" }}
+                                                            key={index} 
+                                                            style={{borderTop:'1px solid #c8ced3',display:columns[i] ? columns[i].showHideCheck ? "":"none":"none"}}
                                                             initial={{opacity: 0,y:-10}} 
                                                             animate={{opacity: 1,y:0}} 
                                                             exit={{ opacity: 0.4, y:-10 }}
-                                                            type={columns[i].type}
+                                                            type={columns[i] ? columns[i].type : ""}
                                                         >
                                                             {cell}
                                                         </motion.td>

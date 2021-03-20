@@ -55,9 +55,9 @@ const initialDataProps = [
 
 
 //Add Id For Delete (Ask User to provide Unique Value And Check (Data.length == columns.length-1) )
-initialDataProps.forEach((item,inde) => {
-  item.push(inde)
-})
+// initialDataProps.forEach((item,inde) => {
+//   item.push(inde)
+// })
 
 
 class App extends Component {
@@ -99,8 +99,8 @@ class App extends Component {
         onDataEdit={this.handleDataEdit} 
         columns={initialColumnProps}
         data={initialDataProps}
-        editButton={true}
-        deleteButton={true}
+        editButton={false}
+        deleteButton={false}
         />
 
 
