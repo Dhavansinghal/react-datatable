@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "..\\..\\..\\Flying\\NodeTransport\\client\\src\\helpers"
+		},
+		{
+			"path": "..\\MyTable"
 		}
 	],
     "settings": {}
